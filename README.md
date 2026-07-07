@@ -8,7 +8,22 @@ A self-hosted web dashboard for managing WireGuard VPN exit nodes from a central
 
 ## Deploy on Your VPS (Docker)
 
-You don't need a GitHub account. Just run these commands on any VPS with Docker installed:
+### Option A — One-command install (recommended)
+
+Downloads the install script, which checks for Docker, configures UFW, opens port 8899, and starts the app automatically:
+
+```bash
+wget https://raw.githubusercontent.com/mypbs/wireguard-orchestrator/main/install.sh
+sudo bash install.sh
+```
+
+Works on Ubuntu/Debian. Installs Docker and UFW if they aren't already present. Safe to re-run for upgrades — preserves your existing `.env`.
+
+---
+
+### Option B — Manual install
+
+If you already have Docker installed and prefer to run each step yourself:
 
 ```bash
 # 1. Download the project
@@ -20,9 +35,16 @@ cd wireguard-orchestrator
 # 2. Generate a secret key
 echo "SESSION_SECRET=$(openssl rand -hex 32)" > .env
 
-# 3. Build and start
+# 3. Open the dashboard port in your firewall (UFW example)
+sudo ufw allow ssh
+sudo ufw allow 8899/tcp
+sudo ufw --force enable
+
+# 4. Build and start
 sudo docker compose up -d --build
 ```
+
+---
 
 Then open **http://your-vps-ip:8899** in your browser. You'll be prompted to create an admin account on first visit.
 
