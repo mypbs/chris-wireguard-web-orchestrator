@@ -12,9 +12,9 @@ You don't need a GitHub account. Just run these commands on any VPS with Docker 
 
 ```bash
 # 1. Download the project
-wget https://github.com/mypbs/chris-wireguard-web-orchestrator/archive/refs/heads/main.zip
+wget https://github.com/mypbs/wireguard-orchestrator/archive/refs/heads/main.zip
 unzip main.zip
-cd chris-wireguard-web-orchestrator-main
+cd wireguard-orchestrator-main
 
 # 2. Generate a secret key
 echo "SESSION_SECRET=$(openssl rand -hex 32)" > .env
@@ -42,7 +42,7 @@ Please handle the full installation, verify it's working, and fix any issues tha
 
 ## What it is
 A self-hosted web dashboard that manages WireGuard VPN nodes over SSH.
-Source: https://github.com/mypbs/chris-wireguard-web-orchestrator
+Source: https://github.com/mypbs/wireguard-orchestrator
 
 ## Installation steps
 
@@ -50,9 +50,9 @@ Source: https://github.com/mypbs/chris-wireguard-web-orchestrator
    and the docker-compose-plugin for this OS before continuing.
 
 2. Download and extract the project:
-     wget https://github.com/mypbs/chris-wireguard-web-orchestrator/archive/refs/heads/main.zip
+     wget https://github.com/mypbs/wireguard-orchestrator/archive/refs/heads/main.zip
      unzip main.zip
-     cd chris-wireguard-web-orchestrator-main
+     cd wireguard-orchestrator-main
 
 3. Generate a session secret and write the .env file:
      echo "SESSION_SECRET=$(openssl rand -hex 32)" > .env
@@ -106,11 +106,11 @@ restart: docker compose restart app
 
 Problem: Existing install — want to update to latest version
 Fix (run from the parent directory of the installation, e.g. ~):
-  cp chris-wireguard-web-orchestrator-main/.env .env.bak
-  wget https://github.com/mypbs/chris-wireguard-web-orchestrator/archive/refs/heads/main.zip
+  cp wireguard-orchestrator-main/.env .env.bak
+  wget https://github.com/mypbs/wireguard-orchestrator/archive/refs/heads/main.zip
   unzip -o main.zip
-  cp .env.bak chris-wireguard-web-orchestrator-main/.env
-  cd chris-wireguard-web-orchestrator-main
+  cp .env.bak wireguard-orchestrator-main/.env
+  cd wireguard-orchestrator-main
   sudo docker compose up -d --build
 (drop sudo if running as root)
 
@@ -207,15 +207,15 @@ ls -d *wireguard*
 cp YOUR-FOLDER-NAME/.env .env.bak
 
 # 3. Download and extract the latest version
-#    (this always creates: chris-wireguard-web-orchestrator-main)
-wget https://github.com/mypbs/chris-wireguard-web-orchestrator/archive/refs/heads/main.zip
+#    (this always creates: wireguard-orchestrator-main)
+wget https://github.com/mypbs/wireguard-orchestrator/archive/refs/heads/main.zip
 unzip -o main.zip
 
 # 4. Restore your saved .env into the new folder
-cp .env.bak chris-wireguard-web-orchestrator-main/.env
+cp .env.bak wireguard-orchestrator-main/.env
 
 # 5. Rebuild and restart
-cd chris-wireguard-web-orchestrator-main
+cd wireguard-orchestrator-main
 sudo docker compose up -d --build
 ```
 
