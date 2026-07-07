@@ -198,17 +198,23 @@ The second number (`3000`) is internal to the container — never change that.
 Run these from the **parent directory** of your installation (e.g. `~`, wherever you originally ran `unzip`):
 
 ```bash
-# 1. Save your existing .env before anything else
-cp chris-wireguard-web-orchestrator-main/.env .env.bak
+# 1. Find your current install folder name (it may differ from the new zip)
+ls -d *wireguard*
+# Note the folder name shown — use it in step 2 below
 
-# 2. Download and overwrite the installation files
+# 2. Save your existing .env before anything else
+#    Replace YOUR-FOLDER-NAME with whatever step 1 showed
+cp YOUR-FOLDER-NAME/.env .env.bak
+
+# 3. Download and extract the latest version
+#    (this always creates: chris-wireguard-web-orchestrator-main)
 wget https://github.com/mypbs/chris-wireguard-web-orchestrator/archive/refs/heads/main.zip
 unzip -o main.zip
 
-# 3. Restore your saved .env (unzip -o would have wiped it)
+# 4. Restore your saved .env into the new folder
 cp .env.bak chris-wireguard-web-orchestrator-main/.env
 
-# 4. Rebuild and restart
+# 5. Rebuild and restart
 cd chris-wireguard-web-orchestrator-main
 sudo docker compose up -d --build
 ```
