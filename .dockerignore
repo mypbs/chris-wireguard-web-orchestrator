@@ -1,0 +1,12 @@
+node_modules
+**/node_modules
+.git
+.gitignore
+**/*.tsbuildinfo
+**/dist/
+.env
+.env.*
+attached_assets/
+.local/
+*.md
+screenshots/

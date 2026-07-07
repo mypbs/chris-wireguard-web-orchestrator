@@ -1,0 +1,760 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: WireGuard Manager API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication
+  - name: nodes
+    description: VPN exit nodes
+  - name: clients
+    description: WireGuard clients per node
+  - name: dashboard
+    description: Dashboard summaries
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current session user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login with username and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout current session
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/setup:
+    get:
+      operationId: getSetupStatus
+      tags: [auth]
+      summary: Check if initial admin setup is needed
+      responses:
+        "200":
+          description: Setup status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SetupStatus"
+    post:
+      operationId: setupAdmin
+      tags: [auth]
+      summary: Create initial admin account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetupInput"
+      responses:
+        "200":
+          description: Admin created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Setup already completed
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get overall dashboard summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /nodes:
+    get:
+      operationId: listNodes
+      tags: [nodes]
+      summary: List all VPN nodes
+      responses:
+        "200":
+          description: List of nodes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Node"
+    post:
+      operationId: createNode
+      tags: [nodes]
+      summary: Add a new VPN exit node
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NodeInput"
+      responses:
+        "201":
+          description: Node created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Node"
+
+  /nodes/{nodeId}:
+    get:
+      operationId: getNode
+      tags: [nodes]
+      summary: Get a single node
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Node detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Node"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateNodeSsh
+      tags: [nodes]
+      summary: Update SSH credentials for a node
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NodeSshUpdateInput"
+      responses:
+        "200":
+          description: Updated node
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Node"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteNode
+      tags: [nodes]
+      summary: Remove a node
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /nodes/{nodeId}/test-connection:
+    post:
+      operationId: testNodeConnection
+      tags: [nodes]
+      summary: Test SSH connection to a node
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Connection test result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectionTestResult"
+
+  /nodes/{nodeId}/setup-wireguard:
+    post:
+      operationId: setupWireguard
+      tags: [nodes]
+      summary: Install and configure WireGuard on a node
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WireguardSetupInput"
+      responses:
+        "200":
+          description: Setup result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+
+  /nodes/{nodeId}/import-wireguard:
+    post:
+      operationId: importWireguard
+      tags: [nodes]
+      summary: Import existing WireGuard configuration from a node without reinstalling
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Import result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportResult"
+
+  /nodes/{nodeId}/wireguard/start:
+    post:
+      operationId: startWireguard
+      tags: [nodes]
+      summary: Start WireGuard on a node
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Action result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+
+  /nodes/{nodeId}/wireguard/stop:
+    post:
+      operationId: stopWireguard
+      tags: [nodes]
+      summary: Stop WireGuard on a node
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Action result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+
+  /nodes/{nodeId}/wireguard/restart:
+    post:
+      operationId: restartWireguard
+      tags: [nodes]
+      summary: Restart WireGuard on a node
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Action result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+
+  /nodes/{nodeId}/wireguard/status:
+    post:
+      operationId: statusWireguard
+      tags: [nodes]
+      summary: Get live systemd status of WireGuard on a node
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Status output
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+
+  /nodes/{nodeId}/wireguard:
+    delete:
+      operationId: uninstallWireguard
+      tags: [nodes]
+      summary: Remove WireGuard from a node
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Action result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+
+  /nodes/{nodeId}/clients:
+    get:
+      operationId: listClients
+      tags: [clients]
+      summary: List WireGuard clients for a node
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Client"
+    post:
+      operationId: createClient
+      tags: [clients]
+      summary: Add a new WireGuard client to a node
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientInput"
+      responses:
+        "201":
+          description: Client created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+
+  /nodes/{nodeId}/clients/{clientId}:
+    get:
+      operationId: getClient
+      tags: [clients]
+      summary: Get a WireGuard client
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Client detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteClient
+      tags: [clients]
+      summary: Remove a WireGuard client from a node
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /nodes/{nodeId}/clients/{clientId}/config:
+    get:
+      operationId: getClientConfig
+      tags: [clients]
+      summary: Get WireGuard .conf file content for a client
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Config file text
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientConfig"
+
+  /nodes/{nodeId}/clients/{clientId}/qr:
+    get:
+      operationId: getClientQr
+      tags: [clients]
+      summary: Get QR code (base64 PNG) for a client config
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: QR code as base64 PNG
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientQr"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+      required:
+        - id
+        - username
+
+    LoginInput:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    SetupStatus:
+      type: object
+      properties:
+        setupRequired:
+          type: boolean
+      required:
+        - setupRequired
+
+    SetupInput:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalNodes:
+          type: integer
+        onlineNodes:
+          type: integer
+        totalClients:
+          type: integer
+        nodesWithWireguard:
+          type: integer
+      required:
+        - totalNodes
+        - onlineNodes
+        - totalClients
+        - nodesWithWireguard
+
+    Node:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        ipAddress:
+          type: string
+        sshUser:
+          type: string
+        sshPort:
+          type: integer
+        sshAuthMethod:
+          type: string
+          enum: [password, private_key]
+        wireguardPort:
+          type: integer
+        wireguardStatus:
+          type: string
+          enum: [not_installed, stopped, running, unknown]
+        wireguardInterface:
+          type: string
+        clientCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - ipAddress
+        - sshUser
+        - sshPort
+        - sshAuthMethod
+        - wireguardPort
+        - wireguardStatus
+        - wireguardInterface
+        - clientCount
+        - createdAt
+
+    NodeInput:
+      type: object
+      properties:
+        name:
+          type: string
+        ipAddress:
+          type: string
+        sshUser:
+          type: string
+        sshPort:
+          type: integer
+        sshAuthMethod:
+          type: string
+          enum: [password, private_key]
+        sshPassword:
+          type: string
+        sshPrivateKey:
+          type: string
+      required:
+        - name
+        - ipAddress
+        - sshUser
+
+    NodeSshUpdateInput:
+      type: object
+      properties:
+        sshAuthMethod:
+          type: string
+          enum: [password, private_key]
+        sshUser:
+          type: string
+        sshPort:
+          type: integer
+        sshPassword:
+          type: string
+        sshPrivateKey:
+          type: string
+
+    WireguardSetupInput:
+      type: object
+      properties:
+        port:
+          type: integer
+        interface:
+          type: string
+        subnet:
+          type: string
+      required:
+        - port
+
+    ConnectionTestResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        latencyMs:
+          type: ["integer", "null"]
+      required:
+        - success
+        - message
+
+    ImportResult:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        wireguardInterface:
+          type: ["string", "null"]
+        wireguardPort:
+          type: ["integer", "null"]
+        wireguardSubnet:
+          type: ["string", "null"]
+        wireguardStatus:
+          type: ["string", "null"]
+        existingPeerCount:
+          type: ["integer", "null"]
+
+    ActionResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        output:
+          type: ["string", "null"]
+      required:
+        - success
+        - message
+
+    Client:
+      type: object
+      properties:
+        id:
+          type: integer
+        nodeId:
+          type: integer
+        name:
+          type: string
+        publicKey:
+          type: string
+        allowedIps:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - nodeId
+        - name
+        - publicKey
+        - allowedIps
+        - createdAt
+
+    ClientInput:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+
+    ClientConfig:
+      type: object
+      properties:
+        config:
+          type: string
+      required:
+        - config
+
+    ClientQr:
+      type: object
+      properties:
+        qrBase64:
+          type: string
+      required:
+        - qrBase64

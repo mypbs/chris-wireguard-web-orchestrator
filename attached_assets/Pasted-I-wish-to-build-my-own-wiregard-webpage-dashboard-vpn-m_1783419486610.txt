@@ -1,0 +1,21 @@
+I wish to build my own wiregard webpage dashboard vpn manager.  The manager and client would run on standard Ubuntu KVM VPS like you can get at Racknerd or other cheap provider. There would be a central wire guard Manager gui dashboard running on the manager VPS.  The manager would allow you do create wireguard profiles on the VPS nodes.  The nodes are wiregard VPN exit points. 
+
+For example the master would be on VPS A.  You wouold login to the dashboard and select "add node" there you would maybe enter the sudo username, password and IP address.  The master would then ssh or do whatever to then establish a connection to the node, VPS1.  
+
+Next you would "setup wireguard vpn" where the master would configure wireguard services on VPS1.  You would be able to select wireguard port(s).  I do not like using standard ports for anything so I would use a default port of 44221 (just as a placeholder, or if there is a better non-standard default port that is fine).
+
+Next would be "Add Client" where you would provide a device/client name for a Wiregard client on that exit node.  The master dashboard would get a copy of the configuration file and qr code for that node and client.
+
+This would be repeatable.  
+
+Resulting in a dashboard that has a list of each exit node that you can click on, then you would see each client configured on that node.  You would be able to delete client keys on the node, add keys, edit keys.
+
+From the dashboard you would be able to start, stop, restart and delete Wireguard on the exit node.
+
+I am thinking it might be best to build the manager inside a docker container so I can move it or make it portable and all the components are self contained.  We want nothing on the clients other than wireguard running and the ability to edit the files on the exit nodes.
+
+The project should be pushed to a private github so I can pull it down to any of my VPS in inventory for deployment.
+
+I was told my AI that I should provide visudo for the username on the VPS for wireguard sudo etc.  Not a problem.  I have three VPS ready to test with!
+
+Make a gameplan.

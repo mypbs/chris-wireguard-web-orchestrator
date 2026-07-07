@@ -1,0 +1,31 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8899:3000"
+    environment:
+      DATABASE_URL: postgres://wgmanager:wgmanager@db:5432/wgmanager
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-to-a-long-random-secret}
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: wgmanager
+      POSTGRES_USER: wgmanager
+      POSTGRES_PASSWORD: wgmanager
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wgmanager -d wgmanager"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  pgdata:
