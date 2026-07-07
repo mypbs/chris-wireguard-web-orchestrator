@@ -14,13 +14,14 @@ You don't need a GitHub account. Just run these commands on any VPS with Docker 
 # 1. Download the project
 wget https://github.com/mypbs/wireguard-orchestrator/archive/refs/heads/main.zip
 unzip main.zip
-cd wireguard-orchestrator-main
+mv wireguard-orchestrator-main wireguard-orchestrator
+cd wireguard-orchestrator
 
 # 2. Generate a secret key
 echo "SESSION_SECRET=$(openssl rand -hex 32)" > .env
 
 # 3. Build and start
-docker compose up -d --build
+sudo docker compose up -d --build
 ```
 
 Then open **http://your-vps-ip:8899** in your browser. You'll be prompted to create an admin account on first visit.
@@ -52,7 +53,8 @@ Source: https://github.com/mypbs/wireguard-orchestrator
 2. Download and extract the project:
      wget https://github.com/mypbs/wireguard-orchestrator/archive/refs/heads/main.zip
      unzip main.zip
-     cd wireguard-orchestrator-main
+     mv wireguard-orchestrator-main wireguard-orchestrator
+     cd wireguard-orchestrator
 
 3. Generate a session secret and write the .env file:
      echo "SESSION_SECRET=$(openssl rand -hex 32)" > .env
@@ -106,11 +108,13 @@ restart: docker compose restart app
 
 Problem: Existing install — want to update to latest version
 Fix (run from the parent directory of the installation, e.g. ~):
-  cp wireguard-orchestrator-main/.env .env.bak
+  cp wireguard-orchestrator/.env .env.bak
   wget https://github.com/mypbs/wireguard-orchestrator/archive/refs/heads/main.zip
-  unzip -o main.zip
-  cp .env.bak wireguard-orchestrator-main/.env
-  cd wireguard-orchestrator-main
+  unzip main.zip
+  rm -rf wireguard-orchestrator
+  mv wireguard-orchestrator-main wireguard-orchestrator
+  cp .env.bak wireguard-orchestrator/.env
+  cd wireguard-orchestrator
   sudo docker compose up -d --build
 (drop sudo if running as root)
 
@@ -198,30 +202,30 @@ The second number (`3000`) is internal to the container — never change that.
 Run these from the **parent directory** of your installation (e.g. `~`, wherever you originally ran `unzip`):
 
 ```bash
-# 1. Find your current install folder name (it may differ from the new zip)
-ls -d *wireguard*
-# Note the folder name shown — use it in step 2 below
+# 1. Save your .env before anything else
+cp wireguard-orchestrator/.env .env.bak
 
-# 2. Save your existing .env before anything else
-#    Replace YOUR-FOLDER-NAME with whatever step 1 showed
-cp YOUR-FOLDER-NAME/.env .env.bak
-
-# 3. Download and extract the latest version
-#    (this always creates: wireguard-orchestrator-main)
+# 2. Download the latest version
 wget https://github.com/mypbs/wireguard-orchestrator/archive/refs/heads/main.zip
-unzip -o main.zip
+unzip main.zip
 
-# 4. Restore your saved .env into the new folder
-cp .env.bak wireguard-orchestrator-main/.env
+# 3. Replace the old folder with the new one
+rm -rf wireguard-orchestrator
+mv wireguard-orchestrator-main wireguard-orchestrator
+
+# 4. Restore your .env
+cp .env.bak wireguard-orchestrator/.env
 
 # 5. Rebuild and restart
-cd wireguard-orchestrator-main
+cd wireguard-orchestrator
 sudo docker compose up -d --build
 ```
 
 > If you're running as **root** (not recommended), drop the `sudo`. If you get a "permission denied" error without `sudo`, add your user to the docker group: `sudo usermod -aG docker $USER && newgrp docker`
 
 Your database data is safe — it lives in a Docker volume that `sudo docker compose up --build` never touches.
+
+> **First time upgrading?** If your current folder isn't named `wireguard-orchestrator` yet, find it first with `ls -d *wireguard*` and use that name in step 1 instead.
 
 ---
 
