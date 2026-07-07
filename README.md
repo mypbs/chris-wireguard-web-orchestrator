@@ -4,6 +4,13 @@
 
 A self-hosted web dashboard for managing WireGuard VPN exit nodes from a central control plane. SSH into your VPS nodes, install WireGuard, and manage all your clients and QR codes from one web interface.
 
+Main Dashboard Screenshot
+<img width="2854" height="1276" alt="CleanShot 2026-07-07 at 23 09 28@2x" src="https://github.com/user-attachments/assets/09c45044-6953-49a2-a694-305a36dd6448" />
+Adding a VPN Node/Exit Point
+<img width="2800" height="1722" alt="CleanShot 2026-07-07 at 23 08 25@2x" src="https://github.com/user-attachments/assets/b4711b46-fd10-4adb-b3e9-d714988be3f1" />
+Adding a Device to the Node
+<img width="2696" height="1864" alt="CleanShot 2026-07-07 at 23 07 05@2x" src="https://github.com/user-attachments/assets/0e3146f6-bd96-485c-97ba-cd49a1533549" />
+
 ---
 
 ## Deploy on Your VPS (Docker)
